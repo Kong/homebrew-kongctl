@@ -1,4 +1,4 @@
-# Kong Kongctl
+# Kong kongctl
 
 ## How do I install these formulae?
 
