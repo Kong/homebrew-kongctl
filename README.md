@@ -2,15 +2,15 @@
 
 ## How do I install these formulae?
 
-`brew install kong/kongctl/<formula>`
+`brew install kong/kongctl/kongctl`
 
-Or `brew tap kong/kongctl` and then `brew install <formula>`.
+Or `brew tap kong/kongctl` and then `brew install kongctl`.
 
 Or, in a [`brew bundle`](https://github.com/Homebrew/homebrew-bundle) `Brewfile`:
 
 ```ruby
 tap "kong/kongctl"
-brew "<formula>"
+brew "kongctl"
 ```
 
 ## Documentation
