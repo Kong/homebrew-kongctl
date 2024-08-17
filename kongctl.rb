@@ -5,20 +5,20 @@
 class Kongctl < Formula
   desc "Developer CLI for Kong"
   homepage "https://github.com/kong/kongctl"
-  version "0.0.5"
+  version "0.0.6"
 
   on_macos do
     on_intel do
-      url "https://github.com/Kong/kongctl/releases/download/v0.0.5/kongctl_darwin_amd64.zip"
-      sha256 "964e3e66be2cebb1a98633ac8ebd8d88e5426873c43c4e37aed18e6631ebb09f"
+      url "https://github.com/Kong/kongctl/releases/download/v0.0.6/kongctl_darwin_amd64.zip"
+      sha256 "2989895b3376782c0da7079924624ba8e1a29747d9474c7499aaa3fe586ac741"
 
       def install
         bin.install "kongctl"
       end
     end
     on_arm do
-      url "https://github.com/Kong/kongctl/releases/download/v0.0.5/kongctl_darwin_arm64.zip"
-      sha256 "cc79f8eff83872af43b13b5c442a8636b30448a1e5ec69f14e2a1f88e4c2404b"
+      url "https://github.com/Kong/kongctl/releases/download/v0.0.6/kongctl_darwin_arm64.zip"
+      sha256 "2a1fc919a5e1ef2c89fd94a39cc3c9fd31d3908c08094d2329575a91884cd1b0"
 
       def install
         bin.install "kongctl"
@@ -29,8 +29,8 @@ class Kongctl < Formula
   on_linux do
     on_intel do
       if Hardware::CPU.is_64_bit?
-        url "https://github.com/Kong/kongctl/releases/download/v0.0.5/kongctl_linux_amd64.zip"
-        sha256 "8c5ab81c5374d51de4bdec73b2c46760b73d50e4566b91deb8d0f71fd7579d17"
+        url "https://github.com/Kong/kongctl/releases/download/v0.0.6/kongctl_linux_amd64.zip"
+        sha256 "1a15d66e9a396d987d34f919e1529c7fb7ad2832a3a5a91b3e91cf6cdb42f60b"
 
         def install
           bin.install "kongctl"
@@ -39,8 +39,8 @@ class Kongctl < Formula
     end
     on_arm do
       if Hardware::CPU.is_64_bit?
-        url "https://github.com/Kong/kongctl/releases/download/v0.0.5/kongctl_linux_arm64.zip"
-        sha256 "4d9f7dffe125f28d926cb7d9dab43fdccc3ba5c8d999c7ff9e50b3995f29558c"
+        url "https://github.com/Kong/kongctl/releases/download/v0.0.6/kongctl_linux_arm64.zip"
+        sha256 "395aaf6e30d97197a642e3413e4a89e80be95439f04c3c3c62040f4a58b67ccb"
 
         def install
           bin.install "kongctl"
