@@ -10,7 +10,7 @@ class Kongctl < Formula
   on_macos do
     on_intel do
       url "https://github.com/Kong/kongctl/releases/download/v0.0.9/kongctl_darwin_amd64.zip"
-      sha256 "dc70261fa18d61f201c2e2ec05097a13604765b2eace292a93b505d0b9e6f565"
+      sha256 "8c74acbcf03c26219b1e3af03a7eb344c5fcbc4ed6bdf2fbd1cc5be3b6ad1941"
 
       def install
         bin.install "kongctl"
@@ -18,7 +18,7 @@ class Kongctl < Formula
     end
     on_arm do
       url "https://github.com/Kong/kongctl/releases/download/v0.0.9/kongctl_darwin_arm64.zip"
-      sha256 "0e520a910d4ed55e8b1c551353849093edb8b4147f62689393216cc4fe6b0159"
+      sha256 "31ddba95af60690e2aafbb341c08548c23c5a5cdd8e5cd570caf0d316a23e9b3"
 
       def install
         bin.install "kongctl"
@@ -30,7 +30,7 @@ class Kongctl < Formula
     on_intel do
       if Hardware::CPU.is_64_bit?
         url "https://github.com/Kong/kongctl/releases/download/v0.0.9/kongctl_linux_amd64.zip"
-        sha256 "d98b32fdde875163a6f96a42624378a3a9659cd408a809ef2f95930d0efc788d"
+        sha256 "a8b7e8597a8c3e933fd90a970d84cc951d613d91bbb89d7262030aa2546c0323"
 
         def install
           bin.install "kongctl"
@@ -40,7 +40,7 @@ class Kongctl < Formula
     on_arm do
       if Hardware::CPU.is_64_bit?
         url "https://github.com/Kong/kongctl/releases/download/v0.0.9/kongctl_linux_arm64.zip"
-        sha256 "2edf9e4ac40d2b419c23a6c9d206b5b7485b29bb7bd3eb3066b33602a89983ff"
+        sha256 "8334ad314120ba6a60df80cd4d5c685bfabb0030df225cd0d248bc2ddbff3e3e"
 
         def install
           bin.install "kongctl"
