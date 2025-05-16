@@ -5,20 +5,20 @@
 class Kongctl < Formula
   desc "Developer CLI for Kong"
   homepage "https://github.com/kong/kongctl"
-  version "0.0.12"
+  version "0.0.13"
 
   on_macos do
-    on_intel do
-      url "https://github.com/Kong/kongctl/releases/download/v0.0.12/kongctl_darwin_amd64.zip"
-      sha256 "fd3979c1599d8145064588c5800508fc76f64b3f57588163df6b598a18e6d7a9"
+    if Hardware::CPU.intel?
+      url "https://github.com/Kong/kongctl/releases/download/v0.0.13/kongctl_darwin_amd64.zip"
+      sha256 "0af8312814e610e59b8c9012cc295637112e873e68defb5c630fc9d18c57a904"
 
       def install
         bin.install "kongctl"
       end
     end
-    on_arm do
-      url "https://github.com/Kong/kongctl/releases/download/v0.0.12/kongctl_darwin_arm64.zip"
-      sha256 "f4ad05bf06f9761e23746e981902d1781af63fb7b8d275a14e89ca819278377d"
+    if Hardware::CPU.arm?
+      url "https://github.com/Kong/kongctl/releases/download/v0.0.13/kongctl_darwin_arm64.zip"
+      sha256 "99b0d66cd4a447062980dacfd7fd879b4ffdb4eadc4d711fb8fd0e57f132442c"
 
       def install
         bin.install "kongctl"
@@ -27,24 +27,18 @@ class Kongctl < Formula
   end
 
   on_linux do
-    on_intel do
-      if Hardware::CPU.is_64_bit?
-        url "https://github.com/Kong/kongctl/releases/download/v0.0.12/kongctl_linux_amd64.zip"
-        sha256 "e6b7f8d57eaa35fddc0258a850820702660a381a86a63856b328f7ff60794629"
-
-        def install
-          bin.install "kongctl"
-        end
+    if Hardware::CPU.intel? and Hardware::CPU.is_64_bit?
+      url "https://github.com/Kong/kongctl/releases/download/v0.0.13/kongctl_linux_amd64.zip"
+      sha256 "cd7804f08405b9384c1df1e953ff45e6445f248d0b5abc925508585e3360c19d"
+      def install
+        bin.install "kongctl"
       end
     end
-    on_arm do
-      if Hardware::CPU.is_64_bit?
-        url "https://github.com/Kong/kongctl/releases/download/v0.0.12/kongctl_linux_arm64.zip"
-        sha256 "094c21596ed1dc678ccbf26871c3cdff52687dd82b1b7ba96aa82febcaba87bb"
-
-        def install
-          bin.install "kongctl"
-        end
+    if Hardware::CPU.arm? and Hardware::CPU.is_64_bit?
+      url "https://github.com/Kong/kongctl/releases/download/v0.0.13/kongctl_linux_arm64.zip"
+      sha256 "cc776eceeb353e6d9b657bd9abbf1c2e14ef980f41df8854a80f2a052391024d"
+      def install
+        bin.install "kongctl"
       end
     end
   end
