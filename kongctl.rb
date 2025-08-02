@@ -5,20 +5,20 @@
 class Kongctl < Formula
   desc "Developer CLI for Kong"
   homepage "https://github.com/kong/kongctl"
-  version "0.0.16"
+  version "0.1.0"
 
   on_macos do
     if Hardware::CPU.intel?
-      url "https://github.com/Kong/kongctl/releases/download/v0.0.16/kongctl_darwin_amd64.zip"
-      sha256 "f8656fa6517502027668220a64aab1e66d99c6c08e39421f6888f4da4bc8d86a"
+      url "https://github.com/Kong/kongctl/releases/download/v0.1.0/kongctl_darwin_amd64.zip"
+      sha256 "7bda86b83adfcf750f5774101badea9a96d48c6164538e2c1259bdeaab9ea297"
 
       def install
         bin.install "kongctl"
       end
     end
     if Hardware::CPU.arm?
-      url "https://github.com/Kong/kongctl/releases/download/v0.0.16/kongctl_darwin_arm64.zip"
-      sha256 "d34a5abf60faea2f7f1c3eda40156e0d6a24851208a1e2e19bd68fbceb8a2a9e"
+      url "https://github.com/Kong/kongctl/releases/download/v0.1.0/kongctl_darwin_arm64.zip"
+      sha256 "175c830fe0c85f0e954466582125eace1d1f379c5c29f5d2df6e4c6827693318"
 
       def install
         bin.install "kongctl"
@@ -28,15 +28,15 @@ class Kongctl < Formula
 
   on_linux do
     if Hardware::CPU.intel? and Hardware::CPU.is_64_bit?
-      url "https://github.com/Kong/kongctl/releases/download/v0.0.16/kongctl_linux_amd64.zip"
-      sha256 "5e6e47dd243dcc4a8ad7c858dd454e427fdcd596d043982080cacdc4bddc1160"
+      url "https://github.com/Kong/kongctl/releases/download/v0.1.0/kongctl_linux_amd64.zip"
+      sha256 "21cb54cdcb3abe57950d3c7ded9287e4115833a639af164f51195a6f45802417"
       def install
         bin.install "kongctl"
       end
     end
     if Hardware::CPU.arm? and Hardware::CPU.is_64_bit?
-      url "https://github.com/Kong/kongctl/releases/download/v0.0.16/kongctl_linux_arm64.zip"
-      sha256 "1ee2b03b14beb86b4b7a2cbd20b994ab941be20543d021215a2509f6f05e85a2"
+      url "https://github.com/Kong/kongctl/releases/download/v0.1.0/kongctl_linux_arm64.zip"
+      sha256 "954252400ab84d1cb98e3ddcb5e71adec546ef119c27f86fe1ef8c8a7c4af2f9"
       def install
         bin.install "kongctl"
       end
