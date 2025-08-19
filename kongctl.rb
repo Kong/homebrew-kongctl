@@ -5,20 +5,20 @@
 class Kongctl < Formula
   desc "Developer CLI for Kong"
   homepage "https://github.com/kong/kongctl"
-  version "0.1.2"
+  version "0.1.3"
 
   on_macos do
     if Hardware::CPU.intel?
-      url "https://github.com/Kong/kongctl/releases/download/v0.1.2/kongctl_darwin_amd64.zip"
-      sha256 "eaac694cf83342c4a5c4c67dbc421e3fb1a609d1e0c5a98abffe689bd753fa99"
+      url "https://github.com/Kong/kongctl/releases/download/v0.1.3/kongctl_darwin_amd64.zip"
+      sha256 "229f3247d5c2d0b6469ffa541a33349e58846bbc07b2fc7d2602ea5286374eed"
 
       def install
         bin.install "kongctl"
       end
     end
     if Hardware::CPU.arm?
-      url "https://github.com/Kong/kongctl/releases/download/v0.1.2/kongctl_darwin_arm64.zip"
-      sha256 "e49831faf7e74b77321890483782c3b841063a433bf1d75b179d40821c0edf63"
+      url "https://github.com/Kong/kongctl/releases/download/v0.1.3/kongctl_darwin_arm64.zip"
+      sha256 "b1d643d0b61d9b8ddc4b42fdd52de1db02f25b13be0012ab9ba1bd54fe8e0d16"
 
       def install
         bin.install "kongctl"
@@ -28,15 +28,15 @@ class Kongctl < Formula
 
   on_linux do
     if Hardware::CPU.intel? and Hardware::CPU.is_64_bit?
-      url "https://github.com/Kong/kongctl/releases/download/v0.1.2/kongctl_linux_amd64.zip"
-      sha256 "30fdf0484102f45ad35260c2761e9810a66005898752dea63a71d8849c84eea0"
+      url "https://github.com/Kong/kongctl/releases/download/v0.1.3/kongctl_linux_amd64.zip"
+      sha256 "951903a77461af8ce8b46eb0dd0dcf07118a278e61d8f171d12b17898247d20e"
       def install
         bin.install "kongctl"
       end
     end
     if Hardware::CPU.arm? and Hardware::CPU.is_64_bit?
-      url "https://github.com/Kong/kongctl/releases/download/v0.1.2/kongctl_linux_arm64.zip"
-      sha256 "e6f4a09327a1862130c3f9a637a8f712faa953164b73ee6ac392b1b79480a5e8"
+      url "https://github.com/Kong/kongctl/releases/download/v0.1.3/kongctl_linux_arm64.zip"
+      sha256 "955177b52f77ceb8faab3760bfb249bc8d60779c3faeac1c04c9693b5bf2bed6"
       def install
         bin.install "kongctl"
       end
