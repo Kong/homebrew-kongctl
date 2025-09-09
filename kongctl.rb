@@ -5,20 +5,20 @@
 class Kongctl < Formula
   desc "Developer CLI for Kong"
   homepage "https://github.com/kong/kongctl"
-  version "0.1.4"
+  version "0.1.5"
 
   on_macos do
     if Hardware::CPU.intel?
-      url "https://github.com/Kong/kongctl/releases/download/v0.1.4/kongctl_darwin_amd64.zip"
-      sha256 "bd93f5528c5d07a342786b3875aa2029f3d5188969eeac4190895787aca299fb"
+      url "https://github.com/Kong/kongctl/releases/download/v0.1.5/kongctl_darwin_amd64.zip"
+      sha256 "e9f10858df61cd453c5275ee721aed088e9743563ae3348097167d9b3b77942d"
 
       def install
         bin.install "kongctl"
       end
     end
     if Hardware::CPU.arm?
-      url "https://github.com/Kong/kongctl/releases/download/v0.1.4/kongctl_darwin_arm64.zip"
-      sha256 "08b3ae0b6ea255587ac44f9ee5154674f858db8c860770f10af88cd9fc363b06"
+      url "https://github.com/Kong/kongctl/releases/download/v0.1.5/kongctl_darwin_arm64.zip"
+      sha256 "bbc6d36f9ccc4343a4527704dd6a5b7160c315d2ca99f65082c960084d124335"
 
       def install
         bin.install "kongctl"
@@ -27,16 +27,16 @@ class Kongctl < Formula
   end
 
   on_linux do
-    if Hardware::CPU.intel? and Hardware::CPU.is_64_bit?
-      url "https://github.com/Kong/kongctl/releases/download/v0.1.4/kongctl_linux_amd64.zip"
-      sha256 "275e2557119122dec0654e3f7df19e40c97749e51e281e6c3bb35391d50f923f"
+    if Hardware::CPU.intel? && Hardware::CPU.is_64_bit?
+      url "https://github.com/Kong/kongctl/releases/download/v0.1.5/kongctl_linux_amd64.zip"
+      sha256 "7a75c8ecba60cfaa2cd93e7724fe34525e5fe1242ba348d0a8feb8bbe45633a0"
       def install
         bin.install "kongctl"
       end
     end
-    if Hardware::CPU.arm? and Hardware::CPU.is_64_bit?
-      url "https://github.com/Kong/kongctl/releases/download/v0.1.4/kongctl_linux_arm64.zip"
-      sha256 "84d0ad126082447703ee3c75d7cff7e2bad7ce1d1cea6c0f80139e337ecf5188"
+    if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
+      url "https://github.com/Kong/kongctl/releases/download/v0.1.5/kongctl_linux_arm64.zip"
+      sha256 "ae158454f8cd0418783191aa2208bd9219912a46e12c270223d3348827c0df87"
       def install
         bin.install "kongctl"
       end
