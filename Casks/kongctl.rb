@@ -14,22 +14,22 @@ cask "kongctl" do
 
   on_macos do
     on_intel do
-      sha256 "f60f949a074903f701035c253c28c23c1d75aa6c5953f13d724f72d18e3cc467"
+      sha256 "955aecf65cf895681a7f95c5e8c6c9b36d90704f1f39ffb57112760ede0e7974"
       url "https://github.com/Kong/kongctl/releases/download/v#{version}/kongctl_darwin_amd64.zip"
     end
     on_arm do
-      sha256 "60b4443986e60bc3008094d4889905097dd6fc95a71f3496d9362a515ed854df"
+      sha256 "82982cc7009bcce09278aec4d838191e693d35ea9af3a91ab9c7caa15fbb5b9f"
       url "https://github.com/Kong/kongctl/releases/download/v#{version}/kongctl_darwin_arm64.zip"
     end
   end
 
   on_linux do
     on_intel do
-      sha256 "9ddd33f2596e3788ead09cfe1d432e8416803ab9f48c50ab194f6adeaf5648ac"
+      sha256 "dc88a99d441c1002e67f7ad94a82272ec5cac71a8234fc53a18bfee1317f7283"
       url "https://github.com/Kong/kongctl/releases/download/v#{version}/kongctl_linux_amd64.zip"
     end
     on_arm do
-      sha256 "afe1d2a5be6d5ed8b0d9de3a0af039d746753c60052981084ecdfc1e7366c50f"
+      sha256 "006857ac60f640b428a9c3ce0d074069437fd99f31c956e83d02e3c43183b08b"
       url "https://github.com/Kong/kongctl/releases/download/v#{version}/kongctl_linux_arm64.zip"
     end
   end
