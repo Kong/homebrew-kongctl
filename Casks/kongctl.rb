@@ -31,15 +31,16 @@ cask "kongctl" do
     skip "Auto-generated on release."
   end
 
-  deprecate! date:                "2026-08-31",
-             because:             "is superseded by the source-built formula",
-             replacement_formula: "kong/kongctl/kongctl"
+  disable! date:                "2027-02-28",
+           because:             "is superseded by the formula; first run `brew uninstall --cask kongctl`",
+           replacement_formula: "kong/kongctl/kongctl"
 
   binary "kongctl"
 
   caveats <<~EOS
-    The kongctl cask is deprecated but will continue receiving releases during
-    the migration period. Migrate to the source-built formula:
+    The kongctl cask is deprecated and will continue receiving releases until
+    Homebrew disables it on February 28, 2027. Migrate to the source-built
+    formula:
 
       brew uninstall --cask kongctl
       brew install --formula kong/kongctl/kongctl
