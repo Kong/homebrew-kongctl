@@ -1,0 +1,100 @@
+name: Homebrew
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out tap
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@cced187498280712e078aaba62dc13a3e9cd80bf
+
+      - name: Trust tap
+        run: brew trust --tap kong/kongctl
+
+      - name: Check tap
+        run: |
+          brew style Formula/kongctl.rb Casks/kongctl.rb
+          brew readall --os=all --arch=all kong/kongctl
+          brew audit --new --formula kong/kongctl/kongctl
+
+  install:
+    name: Install (${{ matrix.name }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux
+            runner: ubuntu-latest
+          - name: macOS Apple Silicon
+            runner: macos-15
+          - name: macOS Intel
+            runner: macos-15-intel
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Check out tap
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@cced187498280712e078aaba62dc13a3e9cd80bf
+
+      - name: Trust tap
+        run: brew trust --tap kong/kongctl
+
+      - name: Test cask migration and fresh formula install
+        shell: bash
+        run: |
+          set -euo pipefail
+          brew install --cask kong/kongctl/kongctl
+          brew uninstall --cask kong/kongctl/kongctl
+          brew install --formula --build-from-source kong/kongctl/kongctl
+          brew test kong/kongctl/kongctl
+          kongctl version --full
+
+  upgrade:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out tap
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@cced187498280712e078aaba62dc13a3e9cd80bf
+
+      - name: Trust tap
+        run: brew trust --tap kong/kongctl
+
+      - name: Test formula upgrade
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! git cat-file -e HEAD^:Formula/kongctl.rb 2>/dev/null; then
+            echo "No previous formula to upgrade from"
+            exit 0
+          fi
+
+          current_formula="$RUNNER_TEMP/kongctl-current.rb"
+          cp Formula/kongctl.rb "$current_formula"
+          git show HEAD^:Formula/kongctl.rb > Formula/kongctl.rb
+          brew install --formula --build-from-source kong/kongctl/kongctl
+          cp "$current_formula" Formula/kongctl.rb
+          brew upgrade --formula --build-from-source kong/kongctl/kongctl
+          brew test kong/kongctl/kongctl
+          kongctl version --full
