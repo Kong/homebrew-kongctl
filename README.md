@@ -1,21 +1,32 @@
 # Kong kongctl
 
-## How do I install this cask?
+## Installation
 
-`brew install --cask kong/kongctl/kongctl`
+Install the source-built formula:
 
-Or `brew tap kong/kongctl` and then `brew install --cask kongctl`.
+```shell
+brew install --formula kong/kongctl/kongctl
+```
 
 Or, in a [`brew bundle`](https://github.com/Homebrew/homebrew-bundle) `Brewfile`:
 
 ```ruby
 tap "kong/kongctl"
-cask "kongctl"
+brew "kongctl"
 ```
 
-## Notes
+## Migrating from the cask
 
-The legacy Homebrew formula has been disabled. If you previously used `brew install kongctl`, switch to the cask commands above.
+The cask is deprecated but will continue receiving releases until Homebrew
+disables it on August 31, 2027. Existing cask users can migrate with:
+
+```shell
+brew uninstall --cask kongctl
+brew install --formula kong/kongctl/kongctl
+```
+
+Ordinary cask uninstall preserves kongctl configuration and authentication
+data. Do not use `--zap` for this migration.
 
 ## Documentation
 
