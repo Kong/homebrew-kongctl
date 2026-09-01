@@ -18,7 +18,7 @@ brew "kongctl"
 ## Migrating from the cask
 
 The cask is deprecated but will continue receiving releases until Homebrew
-disables it on August 31, 2027. Existing cask users can migrate with:
+disables it on November 30, 2026. Existing cask users can migrate with:
 
 ```shell
 brew uninstall --cask kongctl
