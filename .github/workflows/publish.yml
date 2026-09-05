@@ -91,5 +91,7 @@ jobs:
       - name: Push commits
         uses: Homebrew/actions/git-try-push@3cdb78d0f62ad29dd32de765782654f4eedea607 # 2026.08.31.1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # setup-homebrew already supplies Git authentication globally.
+          # Passing token here adds a second Authorization header and fails.
           branch: main
+          tries: 3
