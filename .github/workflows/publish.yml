@@ -57,8 +57,7 @@ jobs:
           [[ "$changed_files" == "Formula/kongctl.rb" ]]
 
           gh pr checks "$PULL_REQUEST" \
-            --repo "$GITHUB_REPOSITORY" \
-            --fail-fast
+            --repo "$GITHUB_REPOSITORY"
 
       - name: Set up Homebrew
         uses: Homebrew/actions/setup-homebrew@3cdb78d0f62ad29dd32de765782654f4eedea607 # 2026.08.31.1
