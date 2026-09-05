@@ -23,5 +23,6 @@ class Kongctl < Formula
     assert_match version.to_s, output
     assert_match "86e156e0", output
     assert_match "__kongctl_debug", shell_output("#{bin}/kongctl completion bash")
+    assert_match "#compdef kongctl", shell_output("#{bin}/kongctl completion zsh")
   end
 end
