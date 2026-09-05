@@ -12,6 +12,10 @@ on:
         description: Expected pull request head commit SHA
         required: true
         type: string
+      reuse_uploaded_bottles:
+        description: Recover a failed metadata push using verified existing public bottles
+        default: false
+        type: boolean
 
 permissions: {}
 
@@ -68,6 +72,13 @@ jobs:
         id: git_setup
         uses: Homebrew/actions/git-user-config@3cdb78d0f62ad29dd32de765782654f4eedea607 # 2026.08.31.1
 
+      - name: Use tap main for publication
+        run: |
+          # A workflow can be dispatched from a maintenance branch. Never
+          # include that branch's workflow changes in the published commits.
+          git fetch origin main
+          git checkout -B main FETCH_HEAD
+
       - name: Pull and publish bottles
         id: pull_bottles
         env:
@@ -78,10 +89,50 @@ jobs:
           HOMEBREW_GIT_COMMITTER_EMAIL: ${{ steps.git_setup.outputs.email }}
           HOMEBREW_GIT_COMMITTER_NAME: ${{ steps.git_setup.outputs.name }}
           PULL_REQUEST: ${{ inputs.pull_request }}
-        run: >-
-          brew pr-pull --debug --retain-bottle-dir
-          --tap="$GITHUB_REPOSITORY" --head-sha="$HEAD_SHA"
-          "$PULL_REQUEST"
+          REUSE_UPLOADED_BOTTLES: ${{ inputs.reuse_uploaded_bottles }}
+        run: |
+          args=(--debug --retain-bottle-dir --tap="$GITHUB_REPOSITORY" --head-sha="$HEAD_SHA")
+          if [[ "$REUSE_UPLOADED_BOTTLES" == true ]]; then
+            args+=(--no-upload)
+          fi
+          brew pr-pull "${args[@]}" "$PULL_REQUEST"
+
+      - name: Verify existing public bottles and recover metadata
+        if: inputs.reuse_uploaded_bottles
+        env:
+          BOTTLE_DIR: ${{ steps.pull_bottles.outputs.bottle_path }}
+        run: |
+          shopt -s nullglob
+          metadata=("$BOTTLE_DIR"/*.bottle.json)
+          [[ ${#metadata[@]} -eq 3 ]]
+          expected_version=$(brew info --json=v2 --formula kong/kongctl/kongctl | jq -er '.formulae[0].versions.stable')
+          # Obtain an anonymous pull token; never use repository credentials
+          # to prove that ordinary users can download these bottles.
+          set +x
+          registry_token=$(curl --fail --silent --show-error --retry 3 --max-time 60 \
+            'https://ghcr.io/token?service=ghcr.io&scope=repository:kong/kongctl/kongctl:pull' | jq -er .token)
+          for json in "${metadata[@]}"; do
+            jq -e --arg version "$expected_version" '
+              keys == ["kong/kongctl/kongctl"] and
+              (.[] | .formula.pkg_version == $version and
+                .bottle.root_url == "https://ghcr.io/v2/kong/kongctl" and
+                (.bottle.tags | length == 1))
+            ' "$json" >/dev/null
+            digest=$(jq -er '.[] .bottle.tags[] .sha256' "$json")
+            filename=$(jq -er '.[] .bottle.tags[] .local_filename' "$json")
+            [[ "$digest" =~ ^[0-9a-f]{64}$ ]]
+            [[ "$filename" == "$(basename "$filename")" ]]
+            printf '%s  %s\n' "$digest" "$BOTTLE_DIR/$filename" | sha256sum --check
+            actual=$(curl --fail --silent --show-error --location --retry 3 --max-time 180 \
+              -H "Authorization: Bearer $registry_token" \
+              "https://ghcr.io/v2/kong/kongctl/kongctl/blobs/sha256:$digest" | sha256sum)
+            [[ "${actual%% *}" == "$digest" ]]
+          done
+          unset registry_token
+          set -x
+          jq -s -e '[.[] | .[] .bottle.tags | keys[]] | sort == ["arm64_sequoia", "sequoia", "x86_64_linux"]' "${metadata[@]}"
+          brew bottle --merge --write "${metadata[@]}"
+          brew audit --formula kong/kongctl/kongctl
 
       - name: Generate build provenance
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
