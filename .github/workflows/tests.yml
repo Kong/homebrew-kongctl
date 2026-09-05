@@ -6,6 +6,12 @@ on:
       - main
   pull_request:
 
+permissions: {}
+
+defaults:
+  run:
+    shell: bash -xeuo pipefail {0}
+
 jobs:
   test-bot:
     strategy:
@@ -13,13 +19,21 @@ jobs:
       matrix:
         os: [ubuntu-24.04, macos-15, macos-15-intel]
     runs-on: ${{ matrix.os }}
+    permissions:
+      actions: read
+      checks: read
+      contents: read
+      packages: read
+      pull-requests: read
     steps:
       - name: Set up Homebrew
         id: set-up-homebrew
-        uses: Homebrew/actions/setup-homebrew@1f8e202ffddf94def7f42f6fa3a482e821489f9c # 2026.07.10.1
+        uses: Homebrew/actions/setup-homebrew@3cdb78d0f62ad29dd32de765782654f4eedea607 # 2026.08.31.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache Homebrew Bundler RubyGems
-        uses: actions/cache@v4
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ steps.set-up-homebrew.outputs.gems-path }}
           key: ${{ matrix.os }}-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
@@ -29,14 +43,70 @@ jobs:
 
       - run: brew test-bot --only-setup
 
-      - run: brew test-bot --only-tap-syntax
+      # Homebrew's Intel ShellCheck dependency needs GMP from source, whose
+      # download servers are unreliable from GitHub runners. Keep this version
+      # aligned with homebrew/core so brew style accepts the executable on PATH.
+      - name: Install ShellCheck binary on Intel macOS
+        if: matrix.os == 'macos-15-intel'
+        run: |
+          shellcheck_dir=$(mktemp -d "$RUNNER_TEMP/shellcheck.XXXXXX")
+          archive="$shellcheck_dir/shellcheck.tar.gz"
+          curl --fail --location --retry 3 --connect-timeout 15 --max-time 120 \
+            --output "$archive" \
+            https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.darwin.x86_64.tar.gz
+          printf '%s  %s\n' \
+            c2c15e08df0e8fbc374c335b230a7ee958c313fa5714817a59aa59f1aa594f51 \
+            "$archive" | shasum -a 256 --check
+          tar -xzf "$archive" -C "$shellcheck_dir"
+          "$shellcheck_dir/shellcheck-v0.11.0/shellcheck" --version
+          # test-bot rebuilds PATH for nested brew commands. Its explicit
+          # prefix/bin survives that reset, unlike a GITHUB_PATH addition.
+          shellcheck_bin="$(brew --prefix)/bin/shellcheck"
+          ln -s "$shellcheck_dir/shellcheck-v0.11.0/shellcheck" "$shellcheck_bin"
+          "$shellcheck_bin" --version
 
-      - run: brew test-bot --only-formulae
+      # Installing actionlint through Homebrew pulls in its ShellCheck formula
+      # dependency even when an external ShellCheck binary is already on PATH.
+      - name: Install actionlint binary on Intel macOS
+        if: matrix.os == 'macos-15-intel'
+        run: |
+          actionlint_dir=$(mktemp -d "$RUNNER_TEMP/actionlint.XXXXXX")
+          archive="$actionlint_dir/actionlint.tar.gz"
+          curl --fail --location --retry 3 --connect-timeout 15 --max-time 120 \
+            --output "$archive" \
+            https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_darwin_amd64.tar.gz
+          printf '%s  %s\n' \
+            5b44c3bc2255115c9b69e30efc0fecdf498fdb63c5d58e17084fd5f16324c644 \
+            "$archive" | shasum -a 256 --check
+          tar -xzf "$archive" -C "$actionlint_dir" actionlint
+          actionlint_bin="$(brew --prefix)/bin/actionlint"
+          ln -s "$actionlint_dir/actionlint" "$actionlint_bin"
+          "$actionlint_bin" -version
+
+      - run: brew test-bot --only-tap-syntax --verbose
+        timeout-minutes: 10
+
+      - name: Authorize GitHub Packages
+        id: packages
         if: github.event_name == 'pull_request'
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          token=$(printf '%s' "$TOKEN" | base64 | tr -d '\n')
+          echo "::add-mask::$token"
+          echo "token=$token" >> "$GITHUB_OUTPUT"
+
+      - name: Test formula and build bottle
+        if: github.event_name == 'pull_request'
+        env:
+          HOMEBREW_DOCKER_REGISTRY_TOKEN: ${{ steps.packages.outputs.token }}
+        run: >-
+          brew test-bot --only-formulae
+          --root-url=https://ghcr.io/v2/kong/kongctl
 
       - name: Upload bottles as artifact
         if: always() && github.event_name == 'pull_request'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: bottles_${{ matrix.os }}
           path: '*.bottle.*'
