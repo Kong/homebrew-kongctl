@@ -112,6 +112,7 @@ jobs:
           github.event_name == 'pull_request' && matrix.os == 'macos-15-intel' &&
           steps.bottles.outputs.skipped_or_failed_formulae == 'kong/kongctl/kongctl'
         run: |
+          brew install --formula --only-dependencies --build-from-source kong/kongctl/kongctl
           brew install --formula --build-bottle kong/kongctl/kongctl
           brew bottle --json --root-url=https://ghcr.io/v2/kong/kongctl kong/kongctl/kongctl
           shopt -s nullglob
