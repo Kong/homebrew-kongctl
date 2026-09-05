@@ -1,0 +1,58 @@
+name: Verify published bottles
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/workflows/verify-bottles.yml
+
+permissions:
+  contents: read
+
+jobs:
+  install:
+    name: Published bottle (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15, macos-15-intel]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@3cdb78d0f62ad29dd32de765782654f4eedea607 # 2026.08.31.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Use the publicly released formula
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git checkout --detach FETCH_HEAD
+          brew trust --tap kong/kongctl
+
+      - name: Install a public bottle without a Homebrew Go dependency
+        shell: bash
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: 1
+        run: |
+          set -euo pipefail
+          # These are disposable runners; remove preinstalled Homebrew Go
+          # formulae so the test proves they are not needed or reinstalled.
+          while IFS= read -r formula; do
+            case "$formula" in
+              go|go@*) brew uninstall --formula --force --ignore-dependencies "$formula" ;;
+            esac
+          done < <(brew list --formula)
+          unset HOMEBREW_GITHUB_API_TOKEN HOMEBREW_GITHUB_PACKAGES_TOKEN
+          unset HOMEBREW_DOCKER_REGISTRY_TOKEN GITHUB_TOKEN GH_TOKEN
+          brew install --formula --force-bottle kong/kongctl/kongctl
+          brew info --json=v2 --formula kong/kongctl/kongctl |
+            jq -e '.formulae[0].installed | length == 1 and .[0].poured_from_bottle == true'
+          brew test kong/kongctl/kongctl
+          kongctl version --full
+          if brew list --formula | grep -E '^go(@.*)?$'; then
+            echo '::error::Bottle installation unexpectedly installed Go'
+            exit 1
+          fi
