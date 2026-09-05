@@ -116,7 +116,7 @@ jobs:
           brew install --formula --build-bottle kong/kongctl/kongctl
           brew bottle --json --root-url=https://ghcr.io/v2/kong/kongctl kong/kongctl/kongctl
           shopt -s nullglob
-          bottles=(kongctl--*.bottle.tar.gz)
+          bottles=(kongctl--*.bottle*.tar.gz)
           [[ ${#bottles[@]} -eq 1 ]]
           brew uninstall --formula kong/kongctl/kongctl
           brew install --formula "./${bottles[0]}"
@@ -130,7 +130,7 @@ jobs:
           contains(steps.bottles.outputs.testing_formulae, 'kong/kongctl/kongctl')
         run: |
           shopt -s nullglob
-          bottles=(kongctl--*.bottle.tar.gz)
+          bottles=(kongctl--*.bottle*.tar.gz)
           metadata=(kongctl--*.bottle.json)
           [[ ${#bottles[@]} -eq 1 ]]
           [[ ${#metadata[@]} -eq 1 ]]
