@@ -43,6 +43,24 @@ jobs:
 
       - run: brew test-bot --only-setup
 
+      # Homebrew's Intel ShellCheck dependency needs GMP from source, whose
+      # download servers are unreliable from GitHub runners. Keep this version
+      # aligned with homebrew/core so brew style accepts the executable on PATH.
+      - name: Install ShellCheck binary on Intel macOS
+        if: matrix.os == 'macos-15-intel'
+        run: |
+          shellcheck_dir=$(mktemp -d "$RUNNER_TEMP/shellcheck.XXXXXX")
+          archive="$shellcheck_dir/shellcheck.tar.gz"
+          curl --fail --location --retry 3 --connect-timeout 15 --max-time 120 \
+            --output "$archive" \
+            https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.darwin.x86_64.tar.gz
+          printf '%s  %s\n' \
+            c2c15e08df0e8fbc374c335b230a7ee958c313fa5714817a59aa59f1aa594f51 \
+            "$archive" | shasum -a 256 --check
+          tar -xzf "$archive" -C "$shellcheck_dir"
+          "$shellcheck_dir/shellcheck-v0.11.0/shellcheck" --version
+          echo "$shellcheck_dir/shellcheck-v0.11.0" >> "$GITHUB_PATH"
+
       - run: brew test-bot --only-tap-syntax
 
       - name: Authorize GitHub Packages
