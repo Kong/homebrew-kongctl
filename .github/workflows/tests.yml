@@ -97,12 +97,44 @@ jobs:
           echo "token=$token" >> "$GITHUB_OUTPUT"
 
       - name: Test formula and build bottle
+        id: bottles
         if: github.event_name == 'pull_request'
         env:
           HOMEBREW_DOCKER_REGISTRY_TOKEN: ${{ steps.packages.outputs.token }}
         run: >-
           brew test-bot --only-formulae
           --root-url=https://ghcr.io/v2/kong/kongctl
+
+      # test-bot skips Intel builds when Go has no compatible Homebrew bottle.
+      # The build dependency can still be installed from source by Homebrew.
+      - name: Build and test Intel bottle with source dependencies
+        if: >-
+          github.event_name == 'pull_request' && matrix.os == 'macos-15-intel' &&
+          steps.bottles.outputs.skipped_or_failed_formulae == 'kong/kongctl/kongctl'
+        run: |
+          brew install --formula --only-dependencies --build-from-source kong/kongctl/kongctl
+          brew install --formula --build-bottle kong/kongctl/kongctl
+          brew bottle --json --root-url=https://ghcr.io/v2/kong/kongctl kong/kongctl/kongctl
+          shopt -s nullglob
+          bottles=(kongctl--*.bottle*.tar.gz)
+          [[ ${#bottles[@]} -eq 1 ]]
+          brew uninstall --formula kong/kongctl/kongctl
+          # Like test-bot, enable developer mode for this local archive install.
+          HOMEBREW_DEVELOPER=1 brew install --formula "./${bottles[0]}"
+          brew linkage --test kong/kongctl/kongctl
+          brew test kong/kongctl/kongctl
+          kongctl version --full
+
+      - name: Require bottle artifacts for changed formula
+        if: >-
+          github.event_name == 'pull_request' &&
+          contains(steps.bottles.outputs.testing_formulae, 'kong/kongctl/kongctl')
+        run: |
+          shopt -s nullglob
+          bottles=(kongctl--*.bottle*.tar.gz)
+          metadata=(kongctl--*.bottle.json)
+          [[ ${#bottles[@]} -eq 1 ]]
+          [[ ${#metadata[@]} -eq 1 ]]
 
       - name: Upload bottles as artifact
         if: always() && github.event_name == 'pull_request'
