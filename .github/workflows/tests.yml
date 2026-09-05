@@ -59,9 +59,14 @@ jobs:
             "$archive" | shasum -a 256 --check
           tar -xzf "$archive" -C "$shellcheck_dir"
           "$shellcheck_dir/shellcheck-v0.11.0/shellcheck" --version
-          echo "$shellcheck_dir/shellcheck-v0.11.0" >> "$GITHUB_PATH"
+          # test-bot rebuilds PATH for nested brew commands. Its explicit
+          # prefix/bin survives that reset, unlike a GITHUB_PATH addition.
+          shellcheck_bin="$(brew --prefix)/bin/shellcheck"
+          ln -s "$shellcheck_dir/shellcheck-v0.11.0/shellcheck" "$shellcheck_bin"
+          "$shellcheck_bin" --version
 
-      - run: brew test-bot --only-tap-syntax
+      - run: brew test-bot --only-tap-syntax --verbose
+        timeout-minutes: 10
 
       - name: Authorize GitHub Packages
         id: packages
