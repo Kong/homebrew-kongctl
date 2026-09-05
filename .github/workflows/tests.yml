@@ -65,6 +65,24 @@ jobs:
           ln -s "$shellcheck_dir/shellcheck-v0.11.0/shellcheck" "$shellcheck_bin"
           "$shellcheck_bin" --version
 
+      # Installing actionlint through Homebrew pulls in its ShellCheck formula
+      # dependency even when an external ShellCheck binary is already on PATH.
+      - name: Install actionlint binary on Intel macOS
+        if: matrix.os == 'macos-15-intel'
+        run: |
+          actionlint_dir=$(mktemp -d "$RUNNER_TEMP/actionlint.XXXXXX")
+          archive="$actionlint_dir/actionlint.tar.gz"
+          curl --fail --location --retry 3 --connect-timeout 15 --max-time 120 \
+            --output "$archive" \
+            https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_darwin_amd64.tar.gz
+          printf '%s  %s\n' \
+            5b44c3bc2255115c9b69e30efc0fecdf498fdb63c5d58e17084fd5f16324c644 \
+            "$archive" | shasum -a 256 --check
+          tar -xzf "$archive" -C "$actionlint_dir" actionlint
+          actionlint_bin="$(brew --prefix)/bin/actionlint"
+          ln -s "$actionlint_dir/actionlint" "$actionlint_bin"
+          "$actionlint_bin" -version
+
       - run: brew test-bot --only-tap-syntax --verbose
         timeout-minutes: 10
 
