@@ -119,7 +119,8 @@ jobs:
           bottles=(kongctl--*.bottle*.tar.gz)
           [[ ${#bottles[@]} -eq 1 ]]
           brew uninstall --formula kong/kongctl/kongctl
-          brew install --formula "./${bottles[0]}"
+          # Like test-bot, enable developer mode for this local archive install.
+          HOMEBREW_DEVELOPER=1 brew install --formula "./${bottles[0]}"
           brew linkage --test kong/kongctl/kongctl
           brew test kong/kongctl/kongctl
           kongctl version --full
