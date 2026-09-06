@@ -1,144 +1,47 @@
-name: brew test-bot
+name: Homebrew bottle installation
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
 
-permissions: {}
-
-defaults:
-  run:
-    shell: bash -xeuo pipefail {0}
+permissions:
+  contents: read
 
 jobs:
+  # Preserve the existing check names used by kongctl release automation.
+  # These jobs consume published bottles; they no longer build or upload them.
   test-bot:
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-24.04, macos-15, macos-15-intel]
     runs-on: ${{ matrix.os }}
-    permissions:
-      actions: read
-      checks: read
-      contents: read
-      packages: read
-      pull-requests: read
+    timeout-minutes: 15
     steps:
-      - name: Set up Homebrew
-        id: set-up-homebrew
-        uses: Homebrew/actions/setup-homebrew@3cdb78d0f62ad29dd32de765782654f4eedea607 # 2026.08.31.1
+      - uses: Homebrew/actions/setup-homebrew@3cdb78d0f62ad29dd32de765782654f4eedea607 # 2026.08.31.1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Cache Homebrew Bundler RubyGems
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ${{ steps.set-up-homebrew.outputs.gems-path }}
-          key: ${{ matrix.os }}-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
-          restore-keys: ${{ matrix.os }}-rubygems-
-
-      - run: brew test-bot --only-cleanup-before
-
-      - run: brew test-bot --only-setup
-
-      # Homebrew's Intel ShellCheck dependency needs GMP from source, whose
-      # download servers are unreliable from GitHub runners. Keep this version
-      # aligned with homebrew/core so brew style accepts the executable on PATH.
-      - name: Install ShellCheck binary on Intel macOS
-        if: matrix.os == 'macos-15-intel'
-        run: |
-          shellcheck_dir=$(mktemp -d "$RUNNER_TEMP/shellcheck.XXXXXX")
-          archive="$shellcheck_dir/shellcheck.tar.gz"
-          curl --fail --location --retry 3 --connect-timeout 15 --max-time 120 \
-            --output "$archive" \
-            https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.darwin.x86_64.tar.gz
-          printf '%s  %s\n' \
-            c2c15e08df0e8fbc374c335b230a7ee958c313fa5714817a59aa59f1aa594f51 \
-            "$archive" | shasum -a 256 --check
-          tar -xzf "$archive" -C "$shellcheck_dir"
-          "$shellcheck_dir/shellcheck-v0.11.0/shellcheck" --version
-          # test-bot rebuilds PATH for nested brew commands. Its explicit
-          # prefix/bin survives that reset, unlike a GITHUB_PATH addition.
-          shellcheck_bin="$(brew --prefix)/bin/shellcheck"
-          ln -s "$shellcheck_dir/shellcheck-v0.11.0/shellcheck" "$shellcheck_bin"
-          "$shellcheck_bin" --version
-
-      # Installing actionlint through Homebrew pulls in its ShellCheck formula
-      # dependency even when an external ShellCheck binary is already on PATH.
-      - name: Install actionlint binary on Intel macOS
-        if: matrix.os == 'macos-15-intel'
-        run: |
-          actionlint_dir=$(mktemp -d "$RUNNER_TEMP/actionlint.XXXXXX")
-          archive="$actionlint_dir/actionlint.tar.gz"
-          curl --fail --location --retry 3 --connect-timeout 15 --max-time 120 \
-            --output "$archive" \
-            https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_darwin_amd64.tar.gz
-          printf '%s  %s\n' \
-            5b44c3bc2255115c9b69e30efc0fecdf498fdb63c5d58e17084fd5f16324c644 \
-            "$archive" | shasum -a 256 --check
-          tar -xzf "$archive" -C "$actionlint_dir" actionlint
-          actionlint_bin="$(brew --prefix)/bin/actionlint"
-          ln -s "$actionlint_dir/actionlint" "$actionlint_bin"
-          "$actionlint_bin" -version
-
-      - run: brew test-bot --only-tap-syntax --verbose
-        timeout-minutes: 10
-
-      - name: Authorize GitHub Packages
-        id: packages
-        if: github.event_name == 'pull_request'
+          stable: true
+      - name: Install the formula's public bottle without Go
+        shell: bash
         env:
-          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HOMEBREW_NO_AUTO_UPDATE: 1
         run: |
-          token=$(printf '%s' "$TOKEN" | base64 | tr -d '\n')
-          echo "::add-mask::$token"
-          echo "token=$token" >> "$GITHUB_OUTPUT"
-
-      - name: Test formula and build bottle
-        id: bottles
-        if: github.event_name == 'pull_request'
-        env:
-          HOMEBREW_DOCKER_REGISTRY_TOKEN: ${{ steps.packages.outputs.token }}
-        run: >-
-          brew test-bot --only-formulae
-          --root-url=https://ghcr.io/v2/kong/kongctl
-
-      # test-bot skips Intel builds when Go has no compatible Homebrew bottle.
-      # The build dependency can still be installed from source by Homebrew.
-      - name: Build and test Intel bottle with source dependencies
-        if: >-
-          github.event_name == 'pull_request' && matrix.os == 'macos-15-intel' &&
-          steps.bottles.outputs.skipped_or_failed_formulae == 'kong/kongctl/kongctl'
-        run: |
-          brew install --formula --only-dependencies --build-from-source kong/kongctl/kongctl
-          brew install --formula --build-bottle kong/kongctl/kongctl
-          brew bottle --json --root-url=https://ghcr.io/v2/kong/kongctl kong/kongctl/kongctl
-          shopt -s nullglob
-          bottles=(kongctl--*.bottle*.tar.gz)
-          [[ ${#bottles[@]} -eq 1 ]]
-          brew uninstall --formula kong/kongctl/kongctl
-          # Like test-bot, enable developer mode for this local archive install.
-          HOMEBREW_DEVELOPER=1 brew install --formula "./${bottles[0]}"
-          brew linkage --test kong/kongctl/kongctl
+          set -euo pipefail
+          brew trust --tap kong/kongctl
+          while IFS= read -r formula; do
+            case "$formula" in
+              go|go@*) brew uninstall --formula --force --ignore-dependencies "$formula" ;;
+            esac
+          done < <(brew list --formula)
+          unset HOMEBREW_GITHUB_API_TOKEN HOMEBREW_GITHUB_PACKAGES_TOKEN
+          unset HOMEBREW_DOCKER_REGISTRY_TOKEN GITHUB_TOKEN GH_TOKEN
+          brew install --formula --force-bottle kong/kongctl/kongctl
+          brew info --json=v2 --formula kong/kongctl/kongctl |
+            jq -e '.formulae[0].installed | length == 1 and .[0].poured_from_bottle == true'
           brew test kong/kongctl/kongctl
           kongctl version --full
-
-      - name: Require bottle artifacts for changed formula
-        if: >-
-          github.event_name == 'pull_request' &&
-          contains(steps.bottles.outputs.testing_formulae, 'kong/kongctl/kongctl')
-        run: |
-          shopt -s nullglob
-          bottles=(kongctl--*.bottle*.tar.gz)
-          metadata=(kongctl--*.bottle.json)
-          [[ ${#bottles[@]} -eq 1 ]]
-          [[ ${#metadata[@]} -eq 1 ]]
-
-      - name: Upload bottles as artifact
-        if: always() && github.event_name == 'pull_request'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: bottles_${{ matrix.os }}
-          path: '*.bottle.*'
+          if brew list --formula | grep -E '^go(@.*)?$'; then
+            echo '::error::Bottle installation unexpectedly installed Go'
+            exit 1
+          fi

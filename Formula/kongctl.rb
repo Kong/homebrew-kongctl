@@ -1,8 +1,7 @@
 class Kongctl < Formula
   desc "Developer CLI for Kong"
   homepage "https://github.com/Kong/kongctl"
-  url "https://github.com/Kong/kongctl/archive/refs/tags/v1.15.0.tar.gz"
-  sha256 "a86c09baa409fbe220c29a6f52f4fb98d473e4b1da1d4b935ccdc6cd766415a1"
+  version "1.15.0"
   license "Apache-2.0"
 
   bottle do
@@ -13,23 +12,34 @@ class Kongctl < Formula
     sha256 cellar: :any_skip_relocation, x86_64_linux:  "63b3a8ca14d79de6ed02f585c3661b22fb29f211be15db24bfcf59ab7ae1e94c"
   end
 
-  depends_on "go" => :build
+  on_macos do
+    on_arm do
+      url "https://github.com/Kong/kongctl/releases/download/v1.15.0/kongctl_darwin_arm64.zip"
+      sha256 "84bee62d03a977c55312cb4a599a93cc80541ba58e3cc727e6333b55ee4f5e03"
+    end
+    on_intel do
+      url "https://github.com/Kong/kongctl/releases/download/v1.15.0/kongctl_darwin_amd64.zip"
+      sha256 "59237d32de65550e9e6f54bcfbc20a5cd2812ca4328bc244cf741de1f91a8667"
+    end
+  end
+
+  on_linux do
+    on_arm do
+      url "https://github.com/Kong/kongctl/releases/download/v1.15.0/kongctl_linux_arm64.zip"
+      sha256 "3d37f08d8ecb02b9128c2f3abb265781efb0a3685b6c20bf4d515547055c04bc"
+    end
+    on_intel do
+      url "https://github.com/Kong/kongctl/releases/download/v1.15.0/kongctl_linux_amd64.zip"
+      sha256 "5fcc9c53ad8577b3f0dc2235b3c29c638381e308e5b23f47ca338c1872f8577c"
+    end
+  end
 
   def install
-    ldflags = %W[
-      -X main.version=#{version}
-      -X main.commit=86e156e0
-      -X main.date=2026-09-02T16:47:12.720631851Z
-    ]
-
-    ENV["CGO_ENABLED"] = "0"
-    system "go", "build", *std_go_args(ldflags:)
+    bin.install "kongctl"
   end
 
   test do
-    output = shell_output("#{bin}/kongctl version --full")
-    assert_match version.to_s, output
-    assert_match "86e156e0", output
+    assert_match version.to_s, shell_output("#{bin}/kongctl version --full")
     assert_match "__kongctl_debug", shell_output("#{bin}/kongctl completion bash")
     assert_match "#compdef kongctl", shell_output("#{bin}/kongctl completion zsh")
   end
