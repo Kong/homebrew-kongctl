@@ -1,0 +1,6 @@
+{
+  "schema": 1,
+  "bottle_producer": "Kong/kongctl",
+  "formula_install": "upstream-binary",
+  "publisher": "metadata-only"
+}

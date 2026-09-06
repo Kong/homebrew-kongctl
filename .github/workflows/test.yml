@@ -20,7 +20,9 @@ jobs:
           persist-credentials: false
 
       - name: Set up Homebrew
-        uses: Homebrew/actions/setup-homebrew@cced187498280712e078aaba62dc13a3e9cd80bf
+        uses: Homebrew/actions/setup-homebrew@3cdb78d0f62ad29dd32de765782654f4eedea607 # 2026.08.31.1
+        with:
+          stable: true
 
       - name: Trust tap
         run: brew trust --tap kong/kongctl
@@ -51,7 +53,9 @@ jobs:
           persist-credentials: false
 
       - name: Set up Homebrew
-        uses: Homebrew/actions/setup-homebrew@cced187498280712e078aaba62dc13a3e9cd80bf
+        uses: Homebrew/actions/setup-homebrew@3cdb78d0f62ad29dd32de765782654f4eedea607 # 2026.08.31.1
+        with:
+          stable: true
 
       - name: Trust tap
         run: brew trust --tap kong/kongctl
@@ -62,9 +66,20 @@ jobs:
           set -euo pipefail
           brew install --cask kong/kongctl/kongctl
           brew uninstall --cask kong/kongctl/kongctl
+          while IFS= read -r formula; do
+            case "$formula" in
+              go|go@*) brew uninstall --formula --force --ignore-dependencies "$formula" ;;
+            esac
+          done < <(brew list --formula)
+          # Homebrew calls this "from source", but our recipe only installs
+          # the upstream release ZIP. This tests the non-bottle fallback.
           brew install --formula --build-from-source kong/kongctl/kongctl
           brew test kong/kongctl/kongctl
           kongctl version --full
+          if brew list --formula | grep -E '^go(@.*)?$'; then
+            echo '::error::Prebuilt fallback unexpectedly installed Go'
+            exit 1
+          fi
 
   upgrade:
     runs-on: ubuntu-latest
@@ -76,7 +91,9 @@ jobs:
           persist-credentials: false
 
       - name: Set up Homebrew
-        uses: Homebrew/actions/setup-homebrew@cced187498280712e078aaba62dc13a3e9cd80bf
+        uses: Homebrew/actions/setup-homebrew@3cdb78d0f62ad29dd32de765782654f4eedea607 # 2026.08.31.1
+        with:
+          stable: true
 
       - name: Trust tap
         run: brew trust --tap kong/kongctl
@@ -93,8 +110,8 @@ jobs:
           current_formula="$RUNNER_TEMP/kongctl-current.rb"
           cp Formula/kongctl.rb "$current_formula"
           git show HEAD^:Formula/kongctl.rb > Formula/kongctl.rb
-          brew install --formula --build-from-source kong/kongctl/kongctl
+          brew install --formula --force-bottle kong/kongctl/kongctl
           cp "$current_formula" Formula/kongctl.rb
-          brew upgrade --formula --build-from-source kong/kongctl/kongctl
+          brew upgrade --formula kong/kongctl/kongctl
           brew test kong/kongctl/kongctl
           kongctl version --full
