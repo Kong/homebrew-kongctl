@@ -29,6 +29,8 @@ Coordinate this tap change with the upstream release-workflow change before
 starting another release. Merge the tap change first, then the upstream PR;
 do not release during the interval. Installation of existing versions remains
 available throughout.
+The `.github/kongctl-release-protocol.json` marker lets the new upstream
+workflow check compatibility before creating a release tag.
 
 The old `brew pr-pull` publisher and bottle CI artifacts are retired. Retry a
 failed upstream publisher using artifacts from the original upstream run.
