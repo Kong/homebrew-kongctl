@@ -1,7 +1,6 @@
 class Kongctl < Formula
   desc "Developer CLI for Kong"
   homepage "https://github.com/Kong/kongctl"
-  version "1.15.0"
   license "Apache-2.0"
 
   bottle do
