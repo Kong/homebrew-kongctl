@@ -1,3 +1,4 @@
+# kongctl-app-auth-rehearsal: 41672047496
 class Kongctl < Formula
   desc "Developer CLI for Kong"
   homepage "https://github.com/Kong/kongctl"
