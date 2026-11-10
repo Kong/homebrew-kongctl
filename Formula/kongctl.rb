@@ -5,30 +5,30 @@ class Kongctl < Formula
 
   bottle do
     root_url "https://ghcr.io/v2/kong/kongctl"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "e1aa7decd224a73747bdc85fcc019bd444e601874a9c81f107d03c0d453c24a7"
-    sha256 cellar: :any_skip_relocation, sequoia:       "5f68270738def9e2fd5431e3fce48ad2ddc5dde1136ede4f13f479ee84b5eb3a"
-    sha256 cellar: :any_skip_relocation, x86_64_linux:  "f6562946cde2ef43485920e6ab3762263b807b4aa8d4872a269c98cb569122fe"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "75a4fd5f8cbe04075da801f5ee87288884163bb6425a3e697a2fb687bc6cd00c"
+    sha256 cellar: :any_skip_relocation, sequoia:       "25b8ee7e773ab8f2c6fc8840a106d4e56cf0950f65b6e68b5ba3edd5a4d1e130"
+    sha256 cellar: :any_skip_relocation, x86_64_linux:  "d1a46cef33ba7c96617f68ed1ecb10b49f8699a6ed7d708fbd48c741e71a7e44"
   end
 
   on_macos do
     on_arm do
-      url "https://github.com/Kong/kongctl/releases/download/v1.26.0/kongctl_darwin_arm64.zip"
-      sha256 "558d43e412599c6414b89ec6afd4d6d6bc63370464772950b456e6bacd68881d"
+      url "https://github.com/Kong/kongctl/releases/download/v1.27.0/kongctl_darwin_arm64.zip"
+      sha256 "7e57c84497e9047e7ba30a155e4bb6e6a51c62f38c40f8536e8ccb9538536c31"
     end
     on_intel do
-      url "https://github.com/Kong/kongctl/releases/download/v1.26.0/kongctl_darwin_amd64.zip"
-      sha256 "1c4a42cf7169c4e79ce80ac9e627b57b19b290e19ccef31c1d98c47daf8ee249"
+      url "https://github.com/Kong/kongctl/releases/download/v1.27.0/kongctl_darwin_amd64.zip"
+      sha256 "086d98cca31e1218f5e26f39c2e2447a0d79d5aef89e64b72261da908d088527"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/Kong/kongctl/releases/download/v1.26.0/kongctl_linux_arm64.zip"
-      sha256 "e27f59ed7877344ea3fa51a74dbae6b89fe049b2c878dc1f7d30f69ae22dbf8a"
+      url "https://github.com/Kong/kongctl/releases/download/v1.27.0/kongctl_linux_arm64.zip"
+      sha256 "9ec40636eda287bc364a21ade2e57ebccb1761788d4d0d214dad458cb1cd575e"
     end
     on_intel do
-      url "https://github.com/Kong/kongctl/releases/download/v1.26.0/kongctl_linux_amd64.zip"
-      sha256 "855ab7fb1875eaac97f79f522d06d6d213ff592f4f1fb9ee2a44b9f7670ae350"
+      url "https://github.com/Kong/kongctl/releases/download/v1.27.0/kongctl_linux_amd64.zip"
+      sha256 "abecbf83978a8e889bd9d1c448c66ca40db0d943aa044183877ed100abfb2951"
     end
   end
 
